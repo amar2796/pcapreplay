@@ -66,6 +66,18 @@
                 <h2>📤 Upload PCAP File</h2>
                 <p id="loadedFile">Loaded: None</p>
                 <input type="file" id="fileInput" accept=".pcap,.pcapng" />
+                <p id="uploadLockedNotice" class="upload-locked-notice hidden">
+                    ⏸ Stop the replay before uploading a different file.
+                </p>
+                <div id="packetPreview" class="packet-preview hidden">
+                    <div class="packet-preview-title">First packets in this file:</div>
+                    <table class="packet-preview-table">
+                        <thead>
+                            <tr><th>#</th><th>Time (ms)</th><th>Size</th><th>Protocol</th><th>Src Port</th><th>Dst Port</th></tr>
+                        </thead>
+                        <tbody id="packetPreviewBody"></tbody>
+                    </table>
+                </div>
             </section>
 
             <!-- Dashboard -->
