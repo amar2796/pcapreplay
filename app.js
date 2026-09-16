@@ -68,6 +68,7 @@ const api = {
     }).then(handleResponse),
 
     getConfig: () => fetch(`${API_BASE}/config`).then(handleResponse),
+    getFileInfo: () => fetch(`${API_BASE}/file-info`).then(handleResponse),
 
     // Channel management
     getChannels: () => fetch(`${API_BASE}/channels`).then(handleResponse),
@@ -394,6 +395,8 @@ function updateUI() {
     document.getElementById('btnStart').disabled = !appState.loaded || appState.running || !appState.hasChannels;
     document.getElementById('btnPause').disabled = !appState.running;
     document.getElementById('btnStop').disabled = !appState.running && !appState.paused;
+
+    updateUploadLockState();
     
     document.getElementById('statusLabel').textContent = appState.status;
 
@@ -534,13 +537,19 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
     if (!file) return;
     
     try {
-        const data = await api.uploadFile(file);
+        await api.uploadFile(file);
+        // /api/upload only confirms success — it never returned fileName/
+        // packetCount itself (that was silently producing "Loaded: undefined"
+        // before). Fetch the real details, and the packet preview, in one
+        // follow-up call.
+        const info = await api.getFileInfo();
         appState.loaded = true;
-        appState.fileName = data.fileName;
-        appState.totalPackets = data.packetCount;
+        appState.fileName = info.fileName;
+        appState.totalPackets = info.packetCount;
         appState.packetsSent = 0;
         
-        document.getElementById('loadedFile').textContent = `Loaded: ${data.fileName}`;
+        document.getElementById('loadedFile').textContent = `Loaded: ${info.fileName}`;
+        renderPacketPreview(info.preview);
         document.getElementById('dashboard').classList.remove('hidden');
         
         initCharts();
@@ -549,6 +558,36 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
         alert(`Upload failed: ${err.message}`);
     }
 });
+
+function renderPacketPreview(preview) {
+    const container = document.getElementById('packetPreview');
+    const tbody = document.getElementById('packetPreviewBody');
+    if (!preview || preview.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+    tbody.innerHTML = preview.map(p => `
+        <tr>
+            <td>${p.index}</td>
+            <td>${p.timeOffsetMs}</td>
+            <td>${p.length}</td>
+            <td>${p.protocol || '—'}</td>
+            <td>${(p.srcPort === null || p.srcPort === undefined) ? '—' : p.srcPort}</td>
+            <td>${(p.dstPort === null || p.dstPort === undefined) ? '—' : p.dstPort}</td>
+        </tr>
+    `).join('');
+    container.classList.remove('hidden');
+}
+
+// Uploading a different file mid-replay would either be silently rejected
+// by the backend (loadPackets() throws if running) or, worse, confuse
+// whichever cycle is currently in flight. Lock the picker while a replay
+// is active or paused, and unlock it once fully stopped.
+function updateUploadLockState() {
+    const locked = appState.running || appState.paused;
+    document.getElementById('fileInput').disabled = locked;
+    document.getElementById('uploadLockedNotice').classList.toggle('hidden', !locked);
+}
 
 document.getElementById('btnStart').addEventListener('click', async () => {
     if (!appState.hasChannels) {
