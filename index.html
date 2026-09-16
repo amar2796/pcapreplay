@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCAP Multicast Sender</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="App">
+        <header>
+            <h1>PCAP Multicast Sender</h1>
+            <p>Phase 3: Configuration & Filtering</p>
+            <div id="connectionStatus" class="connection-status offline">
+                <span class="connection-dot"></span>
+                <span id="connectionText">Connecting...</span>
+            </div>
+        </header>
+
+        <main>
+            <!-- Channels Panel -->
+            <section class="configuration-panel">
+                <h2>🔀 Channels</h2>
+                <p style="color:#666;font-size:13px;margin-bottom:12px;">
+                    Channels are the only way packets get sent — there's no default destination anymore.
+                    Each channel catches packets matching specific ports and sends them to whatever
+                    multicast IP:Port you set, e.g. a "Snapshot" feed on one port going to one group,
+                    "Incremental/TBT" on another. <strong>At least one channel is required</strong> —
+                    any packet that doesn't match one of your channels is not sent anywhere.
+                </p>
+
+                <table class="channels-table" id="channelsTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Match Ports</th>
+                            <th>Destination</th>
+                            <th>Sent</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="channelsTableBody">
+                        <tr><td colspan="6" class="channels-empty-row">⚠️ No channels configured — add at least one below before you can start a replay.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="channel-add-form">
+                    <input type="text" id="channelName" placeholder="Name (e.g. Snapshot)" />
+                    <input type="text" id="channelMatchPorts" placeholder="Match ports (e.g. 15907)" />
+                    <input type="text" id="channelDestIP" placeholder="Destination IP" />
+                    <input type="number" id="channelDestPort" placeholder="Destination port" min="1" max="65535" />
+                    <button id="btnAddChannel">+ Add Channel</button>
+                    <button id="btnCancelEditChannel" class="hidden">Cancel</button>
+                </div>
+
+                <div id="channelsStatus" class="status-message hidden"></div>
+            </section>
+            <div id="noChannelsWarning" class="no-channels-warning hidden">
+                ⚠️ Add at least one channel above before starting a replay — with no channels configured, nothing will be sent.
+            </div>
+
+            <!-- File Upload -->
+            <section class="file-upload">
+                <h2>📤 Upload PCAP File</h2>
+                <p id="loadedFile">Loaded: None</p>
+                <input type="file" id="fileInput" accept=".pcap,.pcapng" />
+            </section>
+
+            <!-- Dashboard -->
+            <div id="dashboard" class="hidden">
+                <div class="progress-section">
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                    <div class="progress-percent-label" id="progressPercent">0%</div>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <div class="stat-value" id="statTotalPackets">0</div>
+                        <div class="stat-label">Total Packets</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="statSentPackets">0</div>
+                        <div class="stat-label">Sent</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="statDroppedPackets">0</div>
+                        <div class="stat-label">Not Routed</div>
+                    </div>
+                </div>
+
+                <div class="player-controls">
+                    <button id="btnStart">▶ Start</button>
+                    <button id="btnPause" disabled>⏸ Pause</button>
+                    <button id="btnStop" disabled>⏹ Stop</button>
+                    <label class="loop-toggle">
+                        <input type="checkbox" id="loopToggle" />
+                        🔁 Repeat
+                    </label>
+                    <input type="number" id="loopMaxCycles" min="0" value="0" title="0 = loop forever" class="loop-cycles-input hidden" />
+                    <div class="status-badge">Status: <span id="statusLabel">STOPPED</span></div>
+                </div>
+                <div id="loopCycleInfo" class="loop-cycle-info hidden"></div>
+
+                <div class="speed-control">
+                    <label>Speed: <span id="speedLabel">1.0x</span></label>
+                    <input type="range" id="speedRange" min="0.1" max="10" step="0.1" value="1.0" />
+                </div>
+
+                <div class="statistics">
+                    <h3>📊 Statistics</h3>
+                    <div class="chart-container">
+                        <h4>Packets Sent</h4>
+                        <canvas id="packetsChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h4>Throughput (pkt/sec)</h4>
+                        <canvas id="throughputChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
