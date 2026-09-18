@@ -3,140 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Professional PCAP Multicast Sender - Network packet replay solution">
+    <meta name="theme-color" content="#0a1730">
     <title>PCAP Multicast Sender</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a1730'/%3E%3Ccircle cx='16' cy='32' r='6' fill='%23ffffff'/%3E%3Ccircle cx='47' cy='16' r='4' fill='%234a8fe0'/%3E%3Ccircle cx='47' cy='32' r='4' fill='%234a8fe0'/%3E%3Ccircle cx='47' cy='48' r='4' fill='%234a8fe0'/%3E%3Cline x1='22' y1='32' x2='43' y2='16' stroke='%234a8fe0' stroke-width='3' stroke-linecap='round'/%3E%3Cline x1='22' y1='32' x2='43' y2='32' stroke='%234a8fe0' stroke-width='3' stroke-linecap='round'/%3E%3Cline x1='22' y1='32' x2='43' y2='48' stroke='%234a8fe0' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="App">
-        <header>
-            <h1>PCAP Multicast Sender</h1>
-            <p>Phase 3: Configuration & Filtering</p>
-            <div id="connectionStatus" class="connection-status offline">
-                <span class="connection-dot"></span>
-                <span id="connectionText">Connecting...</span>
+    <div class="App" role="application" aria-label="PCAP Multicast Sender Application">
+        <!-- Header -->
+        <header class="top-bar" role="banner">
+            <div class="header-content">
+                <div class="brand">
+                    <span class="brand-mark" aria-hidden="true">
+                        <svg viewBox="0 0 32 32" width="26" height="26" fill="none">
+                            <circle cx="8" cy="16" r="2.6" fill="currentColor"/>
+                            <circle cx="24" cy="9" r="1.8" fill="currentColor" opacity="0.55"/>
+                            <circle cx="24" cy="16" r="1.8" fill="currentColor" opacity="0.55"/>
+                            <circle cx="24" cy="23" r="1.8" fill="currentColor" opacity="0.55"/>
+                            <line x1="10.5" y1="16" x2="21.5" y2="9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity="0.3"/>
+                            <line x1="10.5" y1="16" x2="21.5" y2="16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity="0.3"/>
+                            <line x1="10.5" y1="16" x2="21.5" y2="23" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity="0.3"/>
+                            <circle r="1.7" fill="currentColor">
+                                <animate attributeName="cx" values="8;24;8" keyTimes="0;0.45;1" dur="1.8s" begin="0s" repeatCount="indefinite"/>
+                                <animate attributeName="cy" values="16;9;16" keyTimes="0;0.45;1" dur="1.8s" begin="0s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.4;0.45" dur="1.8s" begin="0s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle r="1.7" fill="currentColor">
+                                <animate attributeName="cx" values="8;24;8" keyTimes="0;0.45;1" dur="1.8s" begin="0.4s" repeatCount="indefinite"/>
+                                <animate attributeName="cy" values="16;16;16" keyTimes="0;0.45;1" dur="1.8s" begin="0.4s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.4;0.45" dur="1.8s" begin="0.4s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle r="1.7" fill="currentColor">
+                                <animate attributeName="cx" values="8;24;8" keyTimes="0;0.45;1" dur="1.8s" begin="0.8s" repeatCount="indefinite"/>
+                                <animate attributeName="cy" values="16;23;16" keyTimes="0;0.45;1" dur="1.8s" begin="0.8s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.4;0.45" dur="1.8s" begin="0.8s" repeatCount="indefinite"/>
+                            </circle>
+                        </svg>
+                    </span>
+                    <div class="header-title">
+                        <h1>PCAP Multicast Sender</h1>
+                        <p class="brand-subtitle">Network packet replay &amp; channel routing console</p>
+                    </div>
+                </div>
+                <div id="connectionStatus" class="connection-status offline" role="status" aria-live="polite" aria-label="Connection status">
+                    <span class="connection-dot" aria-hidden="true"></span>
+                    <span id="connectionText">Connecting...</span>
+                </div>
+            </div>
+            <div class="process-rail" aria-hidden="true">
+                <span class="process-step"><i>01</i>Load PCAP</span>
+                <span class="process-step"><i>02</i>Configure Channels</span>
+                <span class="process-step"><i>03</i>Monitor Replay</span>
             </div>
         </header>
 
-        <main>
-            <!-- Channels Panel -->
-            <section class="configuration-panel">
-                <h2>🔀 Channels</h2>
-                <p style="color:#666;font-size:13px;margin-bottom:12px;">
-                    Channels are the only way packets get sent — there's no default destination anymore.
-                    Each channel catches packets matching specific ports and sends them to whatever
-                    multicast IP:Port you set, e.g. a "Snapshot" feed on one port going to one group,
-                    "Incremental/TBT" on another. <strong>At least one channel is required</strong> —
-                    any packet that doesn't match one of your channels is not sent anywhere.
-                </p>
+        <!-- Notifications Container -->
+        <div id="notificationContainer" class="notification-container" role="region" aria-label="Notifications" aria-live="polite" aria-atomic="true"></div>
 
-                <table class="channels-table" id="channelsTable">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Match Ports</th>
-                            <th>Destination</th>
-                            <th>Sent</th>
-                            <th>Status</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="channelsTableBody">
-                        <tr><td colspan="6" class="channels-empty-row">⚠️ No channels configured — add at least one below before you can start a replay.</td></tr>
-                    </tbody>
-                </table>
+        <main class="container">
+            <!-- Top Row: File Upload + Channels Config -->
+            <div class="top-section">
+                <!-- File Upload -->
+                <section class="section file-section">
+                    <h2><span class="step-badge">1</span>Load PCAP File</h2>
+                    <div class="file-upload-area" role="button" tabindex="0" aria-label="Upload PCAP file - click or drag and drop">
+                        <input type="file" id="fileInput" accept=".pcap,.pcapng" class="file-input" aria-label="Select PCAP file" />
+                        <div class="file-upload-content">
+                            <div class="file-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6">
+                                    <path d="M12 3v12m0-12 4 4m-4-4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <p class="file-prompt">Upload or drag &amp; drop a .pcap / .pcapng file</p>
+                        </div>
+                    </div>
+                    <p id="loadedFile" class="file-status" role="status" aria-live="polite">No file loaded</p>
+                    <p id="uploadLockedNotice" class="alert alert-warning hidden" role="status" aria-live="polite">File picker is locked while a replay is running or paused. Stop the replay to load a different file.</p>
 
-                <div class="channel-add-form">
-                    <input type="text" id="channelName" placeholder="Name (e.g. Snapshot)" />
-                    <input type="text" id="channelMatchPorts" placeholder="Match ports (e.g. 15907)" />
-                    <input type="text" id="channelDestIP" placeholder="Destination IP" />
-                    <input type="number" id="channelDestPort" placeholder="Destination port" min="1" max="65535" />
-                    <button id="btnAddChannel">+ Add Channel</button>
-                    <button id="btnCancelEditChannel" class="hidden">Cancel</button>
-                </div>
+                    <!-- Packet Preview Collapsible -->
+                    <div id="packetPreviewContainer" class="packet-preview-container hidden">
+                        <button class="preview-toggle" id="previewToggle" aria-expanded="false" aria-controls="packetPreview">
+                            <span class="toggle-arrow" aria-hidden="true">▶</span>
+                            <span class="toggle-text">Packet Preview</span>
+                            <span class="preview-badge">0 packets</span>
+                        </button>
+                        <div id="packetPreview" class="packet-preview hidden" role="region" aria-label="Packet preview table">
+                            <table class="mini-table">
+                                <caption>First packets in file</caption>
+                                <thead>
+                                    <tr><th>#</th><th>Time</th><th>Size</th><th>Proto</th><th>Sport</th><th>Dport</th></tr>
+                                </thead>
+                                <tbody id="packetPreviewBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
 
-                <div id="channelsStatus" class="status-message hidden"></div>
-            </section>
-            <div id="noChannelsWarning" class="no-channels-warning hidden">
-                ⚠️ Add at least one channel above before starting a replay — with no channels configured, nothing will be sent.
+                <!-- Channels Config -->
+                <section class="section channels-section">
+                    <h2><span class="step-badge">2</span>Channels</h2>
+                    <form class="channel-form channel-add-form" aria-label="Add new channel">
+                        <input type="text" id="channelName" placeholder="Channel Name" class="form-input small" aria-label="Channel name" />
+                        <input type="text" id="channelMatchPorts" placeholder="Filter Port" class="form-input small" aria-label="Match ports" />
+                        <input type="text" id="channelDestIP" placeholder="Sender IP" class="form-input small" aria-label="Destination IP address" />
+                        <input type="number" id="channelDestPort" placeholder="Sender Port" min="1" max="65535" class="form-input small" aria-label="Destination port number" />
+                        <button id="btnAddChannel" class="btn btn-primary btn-sm" type="button">+ Add</button>
+                        <button id="btnCancelEditChannel" class="btn btn-secondary btn-sm hidden" type="button">Cancel</button>
+                    </form>
+                    <div id="noChannelsWarning" class="alert alert-info hidden" role="alert" aria-label="Warning: Configuration required">Add at least one channel to enable replay</div>
+                    <div class="table-wrapper">
+                        <table class="mini-table" id="channelsTable" role="table" aria-label="Configured channels table">
+                            <caption>List of configured multicast channels</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Ports</th>
+                                    <th scope="col">Destination</th>
+                                    <th scope="col">Sent</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="channelsTableBody">
+                                <tr class="empty-row"><td colspan="6">No channels configured</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="channelsStatus" class="alert hidden" role="status" aria-live="polite"></div>
+                </section>
             </div>
 
-            <!-- File Upload -->
-            <section class="file-upload">
-                <h2>📤 Upload PCAP File</h2>
-                <p id="loadedFile">Loaded: None</p>
-                <input type="file" id="fileInput" accept=".pcap,.pcapng" />
-                <p id="uploadLockedNotice" class="upload-locked-notice hidden">
-                    ⏸ Stop the replay before uploading a different file.
-                </p>
-                <div id="packetPreview" class="packet-preview hidden">
-                    <div class="packet-preview-title">First packets in this file:</div>
-                    <table class="packet-preview-table">
-                        <thead>
-                            <tr><th>#</th><th>Time (ms)</th><th>Size</th><th>Protocol</th><th>Src Port</th><th>Dst Port</th></tr>
-                        </thead>
-                        <tbody id="packetPreviewBody"></tbody>
-                    </table>
-                </div>
-            </section>
-
             <!-- Dashboard -->
-            <div id="dashboard" class="hidden">
-                <div class="progress-section">
-                    <div class="progress-bar">
+            <div id="dashboard" class="dashboard hidden">
+                <div class="dashboard-heading">
+                    <span class="step-badge step-badge-dark">3</span>
+                    <h2 class="dashboard-title">Monitor Replay</h2>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-section" role="region" aria-label="Playback progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Playback progress">
                         <div id="progressFill" class="progress-fill"></div>
                     </div>
-                    <div class="progress-percent-label" id="progressPercent">0%</div>
+                    <span id="progressPercent" class="progress-label" aria-live="polite">0%</span>
                 </div>
 
-                <div class="stats-row">
-                    <div class="stat-box">
-                        <div class="stat-value" id="statTotalPackets">0</div>
-                        <div class="stat-label">Total Packets</div>
+                <!-- Stats Row -->
+                <div class="stats-row" role="region" aria-label="Playback statistics">
+                    <div class="stat-mini">
+                        <div class="stat-value" id="statTotalPackets" aria-label="Total packets">0</div>
+                        <div class="stat-label">Total</div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="statSentPackets">0</div>
+                    <div class="stat-mini">
+                        <div class="stat-value" id="statSentPackets" aria-label="Packets sent">0</div>
                         <div class="stat-label">Sent</div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="statDroppedPackets">0</div>
-                        <div class="stat-label">Not Routed</div>
+                    <div class="stat-mini">
+                        <div class="stat-value" id="statDroppedPackets" aria-label="Packets dropped">0</div>
+                        <div class="stat-label">Dropped</div>
+                    </div>
+                    <div class="stat-mini status-box">
+                        <span class="status-label">Status:</span>
+                        <span id="statusLabel" class="status-value" role="status" aria-live="polite">STOPPED</span>
                     </div>
                 </div>
 
-                <div class="player-controls">
-                    <button id="btnStart">▶ Start</button>
-                    <button id="btnPause" disabled>⏸ Pause</button>
-                    <button id="btnStop" disabled>⏹ Stop</button>
-                    <label class="loop-toggle">
-                        <input type="checkbox" id="loopToggle" />
-                        🔁 Repeat
-                    </label>
-                    <input type="number" id="loopMaxCycles" min="0" value="0" title="0 = loop forever" class="loop-cycles-input hidden" />
-                    <div class="status-badge">Status: <span id="statusLabel">STOPPED</span></div>
-                </div>
-                <div id="loopCycleInfo" class="loop-cycle-info hidden"></div>
+                <!-- Controls Row -->
+                <div class="controls-row">
+                    <div class="button-group" role="group" aria-label="Playback controls">
+                        <button id="btnStart" class="btn btn-success" title="Start playback (Ctrl+Enter)">Start</button>
+                        <button id="btnPause" class="btn btn-warning" disabled title="Pause playback (Ctrl+P)">Pause</button>
+                        <button id="btnStop" class="btn btn-danger" disabled title="Stop playback (Ctrl+S)">Stop</button>
+                    </div>
 
-                <div class="speed-control">
-                    <label>Speed: <span id="speedLabel">1.0x</span></label>
-                    <input type="range" id="speedRange" min="0.1" max="10" step="0.1" value="1.0" />
+                    <div class="control-inline">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="loopToggle" aria-label="Enable loop replay" />
+                            <span>Loop</span>
+                        </label>
+                        <input type="number" id="loopMaxCycles" min="0" value="0" class="form-input tiny hidden" aria-label="Maximum number of loops (0 = infinite)" />
+                    </div>
+
+                    <div class="speed-inline" role="group" aria-label="Playback speed control">
+                        <label for="speedRange">Speed:</label>
+                        <input type="range" id="speedRange" min="0.1" max="10" step="0.1" value="1.0" class="slider-mini" aria-label="Playback speed multiplier" aria-valuemin="0.1" aria-valuemax="10" />
+                        <span id="speedLabel" class="speed-value" aria-live="polite">1.0x</span>
+                    </div>
                 </div>
 
-                <div class="statistics">
-                    <h3>📊 Statistics</h3>
-                    <div class="chart-container">
+                <div id="loopCycleInfo" class="info-message hidden" role="status" aria-live="polite" aria-label="Loop cycle information"></div>
+
+                <!-- Charts Row -->
+                <div class="charts-row" role="region" aria-label="Performance charts">
+                    <div class="chart-mini">
                         <h4>Packets Sent</h4>
-                        <canvas id="packetsChart"></canvas>
+                        <canvas id="packetsChart" role="img" aria-label="Line chart showing packets sent over time"></canvas>
                     </div>
-                    <div class="chart-container">
+                    <div class="chart-mini">
                         <h4>Throughput (pkt/sec)</h4>
-                        <canvas id="throughputChart"></canvas>
+                        <canvas id="throughputChart" role="img" aria-label="Line chart showing throughput in packets per second"></canvas>
                     </div>
                 </div>
             </div>
         </main>
+
+        <footer class="app-footer">
+            <span>PCAP Multicast Sender — local replay console</span>
+            <span class="app-footer-dot" aria-hidden="true">•</span>
+            <span>Connected via <code>localhost:8080</code></span>
+        </footer>
     </div>
 
     <script src="app.js"></script>
+    <script>
+        // Notification System
+        window.notificationSystem = {
+            show: function(message, type = 'info', duration = 3000) {
+                const container = document.getElementById('notificationContainer');
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.setAttribute('role', 'alert');
+                
+                const icon = {
+                    'success': '✓',
+                    'error': '✕',
+                    'warning': '⚠',
+                    'info': 'ℹ'
+                }[type] || 'ℹ';
+                
+                notification.innerHTML = `
+                    <span class="notification-icon">${icon}</span>
+                    <span class="notification-message">${message}</span>
+                    <button class="notification-close" onclick="this.parentElement.remove()">×</button>
+                `;
+                
+                container.appendChild(notification);
+                
+                // Animation
+                setTimeout(() => notification.classList.add('show'), 10);
+                
+                if (duration > 0) {
+                    setTimeout(() => {
+                        notification.classList.remove('show');
+                        setTimeout(() => notification.remove(), 300);
+                    }, duration);
+                }
+                
+                return notification;
+            },
+            success: (msg, dur) => window.notificationSystem.show(msg, 'success', dur),
+            error: (msg, dur) => window.notificationSystem.show(msg, 'error', dur || 5000),
+            warning: (msg, dur) => window.notificationSystem.show(msg, 'warning', dur),
+            info: (msg, dur) => window.notificationSystem.show(msg, 'info', dur)
+        };
+
+        // Packet Preview Toggle
+        document.getElementById('previewToggle').addEventListener('click', function() {
+            const preview = document.getElementById('packetPreview');
+            const isOpen = !preview.classList.contains('hidden');
+            
+            preview.classList.toggle('hidden');
+            this.setAttribute('aria-expanded', !isOpen);
+            this.querySelector('.toggle-arrow').style.transform = isOpen ? '' : 'rotate(90deg)';
+        });
+    </script>
 </body>
 </html>

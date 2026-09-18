@@ -140,7 +140,7 @@ async function applyLoopToggle(e) {
         // UI never shows a state the backend didn't actually apply
         e.target.checked = !enabled;
         document.getElementById('loopMaxCycles').classList.toggle('hidden', enabled);
-        alert(`Failed to change repeat setting: ${err.message}`);
+        window.notificationSystem.error(`Failed to change repeat setting: ${err.message}`);
     }
 }
 
@@ -152,7 +152,7 @@ async function applyLoopMaxCycles(e) {
         await api.setConfig({ loopMaxCycles: cycles });
         appState.loopMaxCycles = cycles;
     } catch (err) {
-        alert(`Failed to change repeat count: ${err.message}`);
+        window.notificationSystem.error(`Failed to change repeat count: ${err.message}`);
     }
 }
 
@@ -292,6 +292,15 @@ function showChannelsStatus(message, type = 'success') {
     const el = document.getElementById('channelsStatus');
     el.textContent = message;
     el.className = `status-message ${type === 'error' ? 'error' : ''}`;
+    
+    // Also show as notification
+    if (window.notificationSystem) {
+        if (type === 'error') {
+            window.notificationSystem.error(message);
+        } else {
+            window.notificationSystem.success(message);
+        }
+    }
 }
 
 // Cached copy of the last fetched channel list, so edit/cancel can
@@ -554,18 +563,23 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
         
         initCharts();
         updateUI();
+        window.notificationSystem.success(`✓ File loaded: ${info.fileName} (${info.packetCount} packets)`);
     } catch (err) {
-        alert(`Upload failed: ${err.message}`);
+        window.notificationSystem.error(`Upload failed: ${err.message}`);
     }
 });
 
 function renderPacketPreview(preview) {
+    const previewContainer = document.getElementById('packetPreviewContainer');
     const container = document.getElementById('packetPreview');
     const tbody = document.getElementById('packetPreviewBody');
+    const badge = document.querySelector('.preview-badge');
+    
     if (!preview || preview.length === 0) {
-        container.classList.add('hidden');
+        previewContainer.classList.add('hidden');
         return;
     }
+    
     tbody.innerHTML = preview.map(p => `
         <tr>
             <td>${p.index}</td>
@@ -576,7 +590,13 @@ function renderPacketPreview(preview) {
             <td>${(p.dstPort === null || p.dstPort === undefined) ? '—' : p.dstPort}</td>
         </tr>
     `).join('');
-    container.classList.remove('hidden');
+    
+    // Update badge
+    if (badge) {
+        badge.textContent = `${preview.length} packets`;
+    }
+    
+    previewContainer.classList.remove('hidden');
 }
 
 // Uploading a different file mid-replay would either be silently rejected
@@ -591,7 +611,7 @@ function updateUploadLockState() {
 
 document.getElementById('btnStart').addEventListener('click', async () => {
     if (!appState.hasChannels) {
-        alert('Add at least one channel before starting a replay — with no channels configured, nothing would be sent.');
+        window.notificationSystem.warning('Add at least one channel before starting a replay');
         return;
     }
     try {
@@ -603,8 +623,9 @@ document.getElementById('btnStart').addEventListener('click', async () => {
         statusInterval = setInterval(refreshStatus, 500);
         
         updateUI();
+        window.notificationSystem.success('▶ Replay started');
     } catch (err) {
-        alert(`Start failed: ${err.message}`);
+        window.notificationSystem.error(`Start failed: ${err.message}`);
     }
 });
 
@@ -617,8 +638,9 @@ document.getElementById('btnPause').addEventListener('click', async () => {
         
         if (statusInterval) clearInterval(statusInterval);
         updateUI();
+        window.notificationSystem.warning('⏸ Replay paused');
     } catch (err) {
-        alert(`Pause failed: ${err.message}`);
+        window.notificationSystem.error(`Pause failed: ${err.message}`);
     }
 });
 
@@ -633,8 +655,9 @@ document.getElementById('btnStop').addEventListener('click', async () => {
         
         if (statusInterval) clearInterval(statusInterval);
         updateUI();
+        window.notificationSystem.success('⏹ Replay stopped');
     } catch (err) {
-        alert(`Stop failed: ${err.message}`);
+        window.notificationSystem.error(`Stop failed: ${err.message}`);
     }
 });
 
