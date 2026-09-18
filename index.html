@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Professional PCAP Multicast Sender - Network packet replay solution">
+    <meta name="description" content="Professional PCAP Multicast Replay - Network packet replay solution">
     <meta name="theme-color" content="#0a1730">
-    <title>PCAP Multicast Sender</title>
+    <title>PCAP Multicast Replay</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a1730'/%3E%3Ccircle cx='16' cy='32' r='6' fill='%23ffffff'/%3E%3Ccircle cx='47' cy='16' r='4' fill='%234a8fe0'/%3E%3Ccircle cx='47' cy='32' r='4' fill='%234a8fe0'/%3E%3Ccircle cx='47' cy='48' r='4' fill='%234a8fe0'/%3E%3Cline x1='22' y1='32' x2='43' y2='16' stroke='%234a8fe0' stroke-width='3' stroke-linecap='round'/%3E%3Cline x1='22' y1='32' x2='43' y2='32' stroke='%234a8fe0' stroke-width='3' stroke-linecap='round'/%3E%3Cline x1='22' y1='32' x2='43' y2='48' stroke='%234a8fe0' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="App" role="application" aria-label="PCAP Multicast Sender Application">
+    <div class="App" role="application" aria-label="PCAP Multicast Replay Application">
         <!-- Header -->
         <header class="top-bar" role="banner">
             <div class="header-content">
@@ -43,13 +43,19 @@
                         </svg>
                     </span>
                     <div class="header-title">
-                        <h1>PCAP Multicast Sender</h1>
+                        <h1>PCAP Multicast Replay</h1>
                         <p class="brand-subtitle">Network packet replay &amp; channel routing console</p>
                     </div>
                 </div>
-                <div id="connectionStatus" class="connection-status offline" role="status" aria-live="polite" aria-label="Connection status">
-                    <span class="connection-dot" aria-hidden="true"></span>
-                    <span id="connectionText">Connecting...</span>
+                <div class="header-actions">
+                    <button id="aboutToggle" class="about-toggle" aria-haspopup="dialog" aria-expanded="false" aria-controls="aboutModal">
+                        <span class="about-icon" aria-hidden="true">?</span>
+                        <span>About</span>
+                    </button>
+                    <div id="connectionStatus" class="connection-status offline" role="status" aria-live="polite" aria-label="Connection status">
+                        <span class="connection-dot" aria-hidden="true"></span>
+                        <span id="connectionText">Connecting...</span>
+                    </div>
                 </div>
             </div>
             <div class="process-rail" aria-hidden="true">
@@ -139,7 +145,7 @@
             <!-- Dashboard -->
             <div id="dashboard" class="dashboard hidden">
                 <div class="dashboard-heading">
-                    <span class="step-badge step-badge-dark">3</span>
+                    <span class="step-badge">3</span>
                     <h2 class="dashboard-title">Monitor Replay</h2>
                 </div>
 
@@ -211,10 +217,49 @@
         </main>
 
         <footer class="app-footer">
-            <span>PCAP Multicast Sender — local replay console</span>
+            <span>PCAP Multicast Replay — local replay console</span>
             <span class="app-footer-dot" aria-hidden="true">•</span>
             <span>Connected via <code>localhost:8080</code></span>
         </footer>
+    </div>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="aboutModalTitle">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 id="aboutModalTitle">About PCAP Multicast Replay</h2>
+                <button id="aboutClose" class="modal-close" aria-label="Close about dialog">×</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-intro">PCAP Multicast Replay is a console for taking a captured network trace and replaying it as live multicast traffic — useful for testing downstream systems against real recorded traffic without needing the original source.</p>
+                <div class="about-step">
+                    <span class="step-badge">1</span>
+                    <div>
+                        <h3>Load a capture</h3>
+                        <p>Upload a <code>.pcap</code> / <code>.pcapng</code> file. The console reads its packets and gives you a quick preview before anything is sent.</p>
+                    </div>
+                </div>
+                <div class="about-step">
+                    <span class="step-badge">2</span>
+                    <div>
+                        <h3>Configure channels</h3>
+                        <p>Each channel filters captured packets by port and re-sends them to a chosen multicast destination IP and port — so a single capture can be routed to several destinations at once.</p>
+                    </div>
+                </div>
+                <div class="about-step">
+                    <span class="step-badge">3</span>
+                    <div>
+                        <h3>Monitor the replay</h3>
+                        <p>Start, pause, or stop playback, adjust speed, and optionally loop it. Live stats and charts track packets sent, dropped, and throughput per second as the replay runs.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span>&copy; 2026 PCAP Multicast Replay</span>
+                <span class="modal-footer-dot" aria-hidden="true">•</span>
+                <span>Developed by <a href="https://www.linkedin.com/in/amarjeetvish/" target="_blank" rel="noopener noreferrer">Amarjeet Vishwakarma</a></span>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
@@ -269,6 +314,36 @@
             this.setAttribute('aria-expanded', !isOpen);
             this.querySelector('.toggle-arrow').style.transform = isOpen ? '' : 'rotate(90deg)';
         });
+
+        // About Modal
+        (function () {
+            const modal = document.getElementById('aboutModal');
+            const openBtn = document.getElementById('aboutToggle');
+            const closeBtn = document.getElementById('aboutClose');
+
+            function openModal() {
+                modal.classList.remove('hidden');
+                openBtn.setAttribute('aria-expanded', 'true');
+                closeBtn.focus();
+            }
+
+            function closeModal() {
+                modal.classList.add('hidden');
+                openBtn.setAttribute('aria-expanded', 'false');
+                openBtn.focus();
+            }
+
+            openBtn.addEventListener('click', openModal);
+            closeBtn.addEventListener('click', closeModal);
+
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) closeModal();
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+            });
+        })();
     </script>
 </body>
 </html>
