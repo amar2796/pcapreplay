@@ -1209,6 +1209,151 @@ body {
 .packet-preview { padding: var(--space-8); background: #fff; }
 
 /* ============================================================
+   BACKEND CONNECTION: OVERLAY (mid-use drop) + BANNER (first load)
+   ============================================================ */
+
+.connection-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 23, 48, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 320ms ease, visibility 320ms ease;
+}
+
+.connection-overlay.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* Preview mode overrides — see the ?preview= script in index.html */
+body.preview-overlay .connection-overlay {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+body.preview-banner .connection-banner {
+    transform: translateY(0) !important;
+}
+
+.connection-overlay-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    border-left: 3px solid var(--brand);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-16) var(--space-16);
+    text-align: center;
+    min-width: 240px;
+}
+
+.connection-spinner {
+    width: 34px;
+    height: 34px;
+    margin: 0 auto var(--space-8);
+    border: 3px solid var(--n-200);
+    border-top-color: var(--brand);
+    border-radius: 50%;
+    animation: connection-spin 0.85s linear infinite;
+}
+
+@keyframes connection-spin {
+    to { transform: rotate(360deg); }
+}
+
+.connection-overlay-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--n-900);
+}
+
+.connection-dots::after {
+    content: '...';
+    display: inline-block;
+    width: 0;
+    overflow: hidden;
+    vertical-align: bottom;
+    animation: connection-dots 1.4s steps(4) infinite;
+}
+
+@keyframes connection-dots {
+    to { width: 1.1em; }
+}
+
+.connection-overlay-subtitle {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--n-400);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: var(--space-4);
+}
+
+.connection-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2500;
+    height: 40px;
+    box-sizing: border-box;
+    background: var(--navy-950);
+    color: #fff;
+    padding: 0 var(--space-8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    transform: translateY(-100%);
+    transition: transform 280ms ease;
+}
+
+.connection-banner.is-visible {
+    transform: translateY(0);
+}
+
+/* Reserve space equal to the banner's height so it pushes the header
+   down instead of covering it. :has() reacts to the same is-visible
+   class the JS above already toggles. */
+body:has(#connectionBanner.is-visible) {
+    padding-top: 40px;
+    transition: padding-top 280ms ease;
+}
+
+/* While the banner is up (first load, not yet connected), blur and
+   disable the main working area so it reads as "still loading" rather
+   than a usable-but-broken screen. The header (About, connection
+   status) stays sharp and interactive. */
+body:has(#connectionBanner.is-visible) .container {
+    filter: blur(3px);
+    pointer-events: none;
+    user-select: none;
+    transition: filter 280ms ease;
+}
+
+.connection-banner-spinner {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: connection-spin 0.85s linear infinite;
+    flex-shrink: 0;
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 
@@ -1267,6 +1412,7 @@ body {
     .modal-header { padding: var(--space-6); }
     .modal-header h2 { font-size: 12px; }
     .modal-footer { flex-wrap: wrap; row-gap: var(--space-2); }
+    .connection-overlay-card { padding: var(--space-10); min-width: 200px; }
 }
 
 @media print {

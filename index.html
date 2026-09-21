@@ -257,9 +257,24 @@
             <div class="modal-footer">
                 <span>&copy; 2026 PCAP Multicast Replay</span>
                 <span class="modal-footer-dot" aria-hidden="true">•</span>
-                <span>Developed by <a href="https://www.linkedin.com/in/amarjeetvish/" target="_blank" rel="noopener noreferrer">Amarjeet Vishwakarma</a></span>
+                <span>Developed by <a href="https://www.linkedin.com/in/amarjeetvish/" target="_blank" rel="noopener noreferrer">Amarjeet Vish</a></span>
             </div>
         </div>
+    </div>
+
+    <!-- Backend Connection Overlay (mid-use disconnect) -->
+    <div id="connectionOverlay" class="connection-overlay" role="status" aria-live="polite" aria-label="Connecting to backend">
+        <div class="connection-overlay-card">
+            <div class="connection-spinner" aria-hidden="true"></div>
+            <div class="connection-overlay-title">Connecting<span class="connection-dots" aria-hidden="true"></span></div>
+            <div class="connection-overlay-subtitle">Backend: Offline</div>
+        </div>
+    </div>
+
+    <!-- Backend Connection Banner (first load, before any connection yet) -->
+    <div id="connectionBanner" class="connection-banner" role="status" aria-live="polite">
+        <span class="connection-banner-spinner" aria-hidden="true"></span>
+        <span>Connecting to backend<span class="connection-dots" aria-hidden="true"></span></span>
     </div>
 
     <script src="app.js"></script>
@@ -343,6 +358,51 @@
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
             });
+        })();
+
+        // Backend Connection: banner on first load, full overlay if it
+        // drops after having connected. This needs to remember whether a
+        // connection ever succeeded, which CSS alone can't do, so it's
+        // handled here. Still only reads the online/offline class that
+        // app.js's existing checkBackendConnection() already sets on
+        // #connectionStatus — no changes to app.js itself.
+        (function () {
+            const statusEl = document.getElementById('connectionStatus');
+            const overlay = document.getElementById('connectionOverlay');
+            const banner = document.getElementById('connectionBanner');
+            let everConnected = false;
+
+            function sync() {
+                const isOnline = statusEl.classList.contains('online');
+
+                if (isOnline) {
+                    everConnected = true;
+                    overlay.classList.remove('is-visible');
+                    banner.classList.remove('is-visible');
+                } else if (everConnected) {
+                    overlay.classList.add('is-visible');
+                    banner.classList.remove('is-visible');
+                } else {
+                    banner.classList.add('is-visible');
+                    overlay.classList.remove('is-visible');
+                }
+            }
+
+            sync();
+            new MutationObserver(sync).observe(statusEl, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        })();
+
+        // Preview mode: ?preview=offline forces the full overlay (mid-use
+        // drop), ?preview=connecting forces the banner (first load) — lets
+        // you see either state on demand without touching the real
+        // backend. Purely additive, doesn't affect app.js or normal use.
+        (function () {
+            const mode = new URLSearchParams(window.location.search).get('preview');
+            if (mode === 'offline') document.body.classList.add('preview-overlay');
+            if (mode === 'connecting') document.body.classList.add('preview-banner');
         })();
     </script>
 </body>
