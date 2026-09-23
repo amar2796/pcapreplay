@@ -673,6 +673,73 @@ document.getElementById('speedRange').addEventListener('change', async (e) => {
     }
 });
 
+/* ============================================================
+   ONBOARDING MODAL (First-Time Setup Guide)
+   ============================================================ */
+
+function initializeOnboarding() {
+    const ONBOARDING_KEY = 'pcapReplay_onboardingCompleted';
+    const onboardingModal = document.getElementById('onboardingModal');
+    const onboardingClose = document.getElementById('onboardingClose');
+    const onboardingSkip = document.getElementById('onboardingSkip');
+    const onboardingConfirm = document.getElementById('onboardingConfirm');
+    const aboutOpenSetup = document.getElementById('aboutOpenSetup');
+
+    function closeOnboarding() {
+        onboardingModal.classList.add('hidden');
+        localStorage.setItem(ONBOARDING_KEY, 'true');
+    }
+
+    function openOnboarding() {
+        onboardingModal.classList.remove('hidden');
+        onboardingClose.focus();
+    }
+
+    // Check if user has already seen onboarding
+    const hasSeenOnboarding = localStorage.getItem(ONBOARDING_KEY) === 'true';
+
+    // Show onboarding on first page load if not seen before
+    if (!hasSeenOnboarding) {
+        openOnboarding();
+    }
+
+    // Event listeners for onboarding modal
+    onboardingClose.addEventListener('click', closeOnboarding);
+    onboardingSkip.addEventListener('click', closeOnboarding);
+    onboardingConfirm.addEventListener('click', closeOnboarding);
+
+    // Close on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !onboardingModal.classList.contains('hidden')) {
+            closeOnboarding();
+        }
+    });
+
+    // Close on backdrop click
+    onboardingModal.addEventListener('click', (e) => {
+        if (e.target === onboardingModal) {
+            closeOnboarding();
+        }
+    });
+
+    // Open onboarding from About modal
+    if (aboutOpenSetup) {
+        aboutOpenSetup.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeAboutModal();
+            openOnboarding();
+        });
+    }
+
+    // Helper function to close About modal (if it's open)
+    function closeAboutModal() {
+        const aboutModal = document.getElementById('aboutModal');
+        if (aboutModal && !aboutModal.classList.contains('hidden')) {
+            aboutModal.classList.add('hidden');
+        }
+    }
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     initConfigPanel();
@@ -680,4 +747,5 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshChannels();
     startConnectionHeartbeat();
     updateUI();
+    initializeOnboarding();
 });

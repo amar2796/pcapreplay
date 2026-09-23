@@ -223,6 +223,74 @@
         </footer>
     </div>
 
+    <!-- Onboarding Modal (First-Time Setup Guide) -->
+    <div id="onboardingModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="onboardingModalTitle">
+        <div class="modal-card modal-card-lg">
+            <div class="modal-header">
+                <h2 id="onboardingModalTitle">Quick Start Guide</h2>
+                <button id="onboardingClose" class="modal-close" aria-label="Close setup guide">×</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-intro">Welcome to PCAP Multicast Replay! Before you can start replaying network packets, you need to have the backend server running on your computer.</p>
+                
+                <div class="onboarding-step">
+                    <div class="onboarding-step-header">
+                        <span class="step-badge">1</span>
+                        <h3>Download Backend Server</h3>
+                    </div>
+                    <div class="onboarding-step-content">
+                        <p>Download the backend server executable (<code>Server.exe</code>).</p>
+                        <a href="https://raw.githubusercontent.com/amar2796/pcapreplay.exe/main/Server.exe" class="btn btn-primary btn-sm" style="display: inline-block; margin-top: 8px;" download="pcapreplay-server.exe">
+                            📥 Download Backend (.exe)
+                        </a>
+                        <p class="onboarding-hint">💡 File will download directly to your computer</p>
+                    </div>
+                </div>
+
+                <div class="onboarding-step">
+                    <div class="onboarding-step-header">
+                        <span class="step-badge">2</span>
+                        <h3>Run the Server</h3>
+                    </div>
+                    <div class="onboarding-step-content">
+                        <ol class="onboarding-list">
+                            <li>Save the downloaded <code>pcapreplay.exe</code> file anywhere on your computer</li>
+                            <li>Double-click the file to run it</li>
+                            <li>A command window will open — leave it running in the background</li>
+                            <li>The server will start on <code>localhost:8080</code></li>
+                        </ol>
+                        <div class="alert alert-warning onboarding-warning">
+                            <strong>⚠️ Important:</strong> Keep the server running while using this console. If you close it, you'll need to restart it to use the app again.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="onboarding-step">
+                    <div class="onboarding-step-header">
+                        <span class="step-badge">3</span>
+                        <h3>Start Using the App</h3>
+                    </div>
+                    <div class="onboarding-step-content">
+                        <p>Once the server is running, this page will automatically connect. Then you can:</p>
+                        <ul class="onboarding-list">
+                            <li>Upload a <code>.pcap</code> or <code>.pcapng</code> capture file</li>
+                            <li>Configure multicast channels for packet routing</li>
+                            <li>Monitor and replay your network traffic</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="onboarding-help">
+                    <p><strong>Need help?</strong> Open the About menu (?) to learn more about each step, or visit the <a href="https://github.com/amar2796/pcapreplay" target="_blank" rel="noopener noreferrer">GitHub repository</a> for documentation.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="onboardingSkip" class="btn btn-secondary" style="margin-right: 8px;">Skip for Now</button>
+                <button id="onboardingConfirm" class="btn btn-primary">Got It!</button>
+            </div>
+        </div>
+    </div>
+
     <!-- About Modal -->
     <div id="aboutModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="aboutModalTitle">
         <div class="modal-card">
@@ -251,6 +319,13 @@
                     <div>
                         <h3>Monitor the replay</h3>
                         <p>Start, pause, or stop playback, adjust speed, and optionally loop it. Live stats and charts track packets sent, dropped, and throughput per second as the replay runs.</p>
+                    </div>
+                </div>
+                <div class="about-step">
+                    <span class="step-badge">📋</span>
+                    <div>
+                        <h3>Setup Guide</h3>
+                        <p>Need to set up the backend server? <button id="aboutOpenSetup" class="link-button">Open the Quick Start Guide</button> to download and run the backend.</p>
                     </div>
                 </div>
             </div>

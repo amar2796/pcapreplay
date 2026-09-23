@@ -331,6 +331,23 @@ body {
     flex-shrink: 0;
 }
 
+/* Support buttons in modal footer (for onboarding) */
+.modal-footer .btn {
+    font-size: 12px;
+    padding: var(--space-6) var(--space-10);
+}
+
+.modal-footer .btn-secondary {
+    background: var(--n-100);
+    border-color: var(--n-200);
+    color: var(--n-700);
+}
+
+.modal-footer .btn-secondary:hover {
+    background: var(--n-150);
+    border-color: var(--n-300);
+}
+
 .modal-footer-dot { color: var(--n-300); }
 
 .modal-footer a {
@@ -368,6 +385,154 @@ body {
     padding: 1px var(--space-3);
     border-radius: var(--radius-sm);
     font-size: 11px;
+}
+
+/* ============================================================
+   ONBOARDING MODAL (First-Time Setup Guide)
+   ============================================================ */
+
+.modal-card-lg {
+    max-width: 620px;
+}
+
+.onboarding-step {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: var(--space-8);
+    background: var(--n-50);
+    border: 1px solid var(--n-150);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--brand);
+}
+
+.onboarding-step-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-6);
+}
+
+.onboarding-step-header h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--n-900);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 0;
+    padding-top: 2px;
+}
+
+.onboarding-step-content {
+    margin-left: 44px;
+}
+
+.onboarding-step-content p {
+    font-size: 12px;
+    color: var(--n-700);
+    line-height: 1.6;
+    margin: 0 0 var(--space-6);
+}
+
+.onboarding-step-content code {
+    font-family: var(--font-mono);
+    background: var(--n-100);
+    color: var(--n-800);
+    padding: 1px var(--space-3);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+}
+
+.onboarding-list {
+    margin: var(--space-4) 0 var(--space-6);
+    padding-left: 20px;
+    font-size: 12px;
+    color: var(--n-700);
+    line-height: 1.6;
+}
+
+.onboarding-list li {
+    margin-bottom: var(--space-4);
+}
+
+.onboarding-list li code {
+    font-family: var(--font-mono);
+    background: var(--n-100);
+    color: var(--n-800);
+    padding: 1px var(--space-3);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+}
+
+.onboarding-hint {
+    font-size: 11px !important;
+    color: var(--n-500);
+    font-style: italic;
+    margin-top: var(--space-4) !important;
+    margin-bottom: 0 !important;
+}
+
+.onboarding-warning {
+    margin: var(--space-6) 0 0;
+    padding: var(--space-6);
+    background: var(--warning-light);
+    border: 1px solid var(--warning);
+    border-left: 3px solid var(--warning);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    color: var(--n-800);
+    line-height: 1.5;
+}
+
+.onboarding-warning strong {
+    color: var(--warning-hover);
+    font-weight: 700;
+}
+
+.onboarding-help {
+    padding: var(--space-8);
+    background: var(--brand-light);
+    border: 1px solid var(--brand);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    color: var(--n-800);
+    line-height: 1.6;
+}
+
+.onboarding-help p {
+    margin: 0;
+}
+
+.onboarding-help a {
+    color: var(--brand);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.onboarding-help a:hover {
+    text-decoration: underline;
+}
+
+.link-button {
+    background: none;
+    border: none;
+    color: var(--brand);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    font-size: inherit;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.link-button:hover {
+    text-decoration: underline;
+}
+
+.link-button:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+    border-radius: var(--radius-sm);
+    padding: 0 var(--space-2);
 }
 
 .connection-status.online {
@@ -1413,6 +1578,35 @@ body:has(#connectionBanner.is-visible) .container {
     .modal-header h2 { font-size: 12px; }
     .modal-footer { flex-wrap: wrap; row-gap: var(--space-2); }
     .connection-overlay-card { padding: var(--space-10); min-width: 200px; }
+}
+
+@media (max-width: 768px) {
+    .modal-card-lg {
+        max-width: 100%;
+    }
+
+    .onboarding-step {
+        padding: var(--space-6);
+    }
+
+    .onboarding-step-header {
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+
+    .onboarding-step-content {
+        margin-left: 0;
+    }
+
+    .onboarding-list {
+        font-size: 11px;
+        padding-left: 18px;
+    }
+
+    .modal-footer .btn {
+        padding: var(--space-5) var(--space-8);
+        font-size: 11px;
+    }
 }
 
 @media print {
