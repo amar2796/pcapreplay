@@ -544,7 +544,16 @@ function updateCharts(currentPackets) {
 document.getElementById('fileInput').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
+
+    // Reject oversized files immediately, client-side, before anything is
+    // sent to the server. Must match the backend's set_payload_max_length.
+    const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
+    if (file.size > MAX_FILE_SIZE) {
+        window.notificationSystem.error(`File too large: ${(file.size / (1024 * 1024)).toFixed(1)}MB (max 500MB)`);
+        e.target.value = '';
+        return;
+    }
+
     try {
         await api.uploadFile(file);
         // /api/upload only confirms success — it never returned fileName/
